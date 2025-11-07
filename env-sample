@@ -1,0 +1,5 @@
+GRAPHQL_URL="https://headless-stg.atlasusa.net/graphql"
+FBPIXEL_TRACK_ID=""
+ENABLE_FACEBOOK_TRACKING="false"
+PAYPAL_RETURN_URL=""
+PAYPAL_CANCEL_URL=""

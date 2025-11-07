@@ -1,0 +1,32 @@
+{
+    "name": "ArielBath",
+    "short_name": "ArielBath",
+    "start_url": "/",
+    "theme_color": "#222321",
+    "display": "standalone",
+    "background_color": "#fff",
+    "description": "ARIEL Bath | Shop Bathroom Vanities, Whirlpool Bathtubs, Free Standing Bathtubs, Showers, and more.",
+    "icons": [
+        {
+            "src": "/media/icons/ariel_circle_144.png",
+            "sizes": "144x144",
+            "type": "image/png"
+        },
+        {
+            "src": "/media/icons/ariel_circle_192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/media/icons/ariel_circle_512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        },
+        {
+            "src": "/media/icons/ariel_maskable_512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ]
+}
