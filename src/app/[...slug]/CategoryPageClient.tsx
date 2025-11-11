@@ -19,7 +19,6 @@ interface CategoryPageClientProps {
  */
 export function CategoryPageClient({
   ssrData,
-  categoryUid,
 }: CategoryPageClientProps) {
   const router = useRouter();
   const pathname = usePathname();

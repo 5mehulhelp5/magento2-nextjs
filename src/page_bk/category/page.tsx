@@ -1,6 +1,6 @@
 "use client";
 import { ProductListContainer } from "@/container";
-import { useSuspenseQuery } from "@apollo/experimental-nextjs-app-support/ssr";
+import { useSuspenseQuery } from "@apollo/client"
 import { Queries } from "@/utils/graphql";
 import { usePathname, useRouter } from "next/navigation";
 import { convertObjectToQuerystring } from "@/utils/helper";

@@ -1,14 +1,12 @@
 "use client";
 import { BrowserPersistence, localStorageKeys } from "@/utils";
-// ^ this file needs the "use client" pragma
-
 import { ApolloLink, HttpLink } from "@apollo/client";
 import {
   ApolloNextAppProvider,
-  NextSSRInMemoryCache,
-  NextSSRApolloClient,
+  ApolloClient,
+  InMemoryCache,
   SSRMultipartLink,
-} from "@apollo/experimental-nextjs-app-support/ssr";
+} from "@apollo/client-integration-nextjs";
 import { CachePersistor } from "apollo-cache-persist";
 import React from "react";
 import { cacheStorage, CACHE_PERSIST_PREFIX } from "@/utils/cacheStorage";
@@ -34,7 +32,7 @@ if (typeof window !== "undefined" && typeof console !== "undefined") {
 
 // Shared cache instance for client-side persistence
 // NextSSRInMemoryCache is a class, so we need to use InstanceType to get the instance type
-type NextSSRInMemoryCacheInstance = InstanceType<typeof NextSSRInMemoryCache>;
+type NextSSRInMemoryCacheInstance = InstanceType<typeof InMemoryCache>;
 let sharedCache: NextSSRInMemoryCacheInstance | null = null;
 let cachePersistor: CachePersistor<unknown> | null = null;
 let persistorInitialized = false;
@@ -119,11 +117,7 @@ function makeClient() {
     // (this does not work if you are rendering your page with `export const dynamic = "force-static"`)
     fetchOptions: typeof window === "undefined"
       ? { cache: "force-cache", next: { revalidate: 3600 } }
-      : { cache: "no-store" },
-    // you can override the default `fetchOptions` on a per query basis
-    // via the `context` property on the options passed as a second argument
-    // to an Apollo Client data fetching hook, e.g.:
-    // const { data } = useSuspenseQuery(MY_QUERY, { context: { fetchOptions: { cache: "force-cache" }}});
+      : { cache: "no-store" }
   });
 
   const possibleTypes = getPossibleTypes();
@@ -131,7 +125,7 @@ function makeClient() {
   // Use shared cache instance on client-side for persistence
   const cache = typeof window !== "undefined" && sharedCache
     ? sharedCache
-    : new NextSSRInMemoryCache({
+    : new InMemoryCache({
         possibleTypes,
       });
 
@@ -171,7 +165,7 @@ function makeClient() {
     clientConfig.connectToDevTools = false;
   }
 
-  const client = new NextSSRApolloClient(clientConfig);
+  const client = new ApolloClient(clientConfig);
 
   // Attach persistor to client for potential future use
   if (cachePersistor && typeof window !== "undefined") {

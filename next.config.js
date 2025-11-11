@@ -124,8 +124,30 @@ const withPWA = require("next-pwa")({
       },
     },
     {
+      // Route for all JS files and bundles. This route uses CacheFirst
+      // strategy because if the file contents change, the file name will
+      // change. There is no point in using StaleWhileRevalidate for JS files.
+      // Similar to pwa-arielbath registerRoutes.js
       urlPattern: /\.js$/i,
-      handler: "CacheFirst"
+      handler: "CacheFirst",
+      options: {
+        cacheName: "static-js-assets",
+        cacheableResponse: {
+          statuses: [0, 200],
+        },
+      },
+    },
+    {
+      // Route for CSS files. Uses CacheFirst strategy similar to JS files
+      // because if the file contents change, the file name will change.
+      urlPattern: /\.(?:css|less)$/i,
+      handler: "CacheFirst",
+      options: {
+        cacheName: "static-style-assets",
+        cacheableResponse: {
+          statuses: [0, 200],
+        },
+      },
     },
     {
       urlPattern: /\.(?:png|gif|jpg|jpeg|svg)$/i,
