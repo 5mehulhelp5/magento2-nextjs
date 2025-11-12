@@ -2,11 +2,14 @@
 import { combineComponents } from "@/utils/combineComponents";
 import {
   AppContextProvider,
-  AppContextProviderProps,
-  CartContextProvider,
-  CartContextProviderProps,
+  CartContextProvider
 } from "@/context";
+import { StoreConfigProvider } from "@/hooks/useStoreConfig";
 
-export const RootContextProvider = combineComponents<
-  AppContextProviderProps | CartContextProviderProps
->(AppContextProvider, CartContextProvider);
+// Combine all context providers
+// Note: combineComponents accepts any number of providers that accept { children: ReactNode }
+export const RootContextProvider = combineComponents(
+  AppContextProvider,
+  CartContextProvider,
+  StoreConfigProvider
+);

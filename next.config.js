@@ -1,11 +1,17 @@
 /** @type {import('next').NextConfig} */
 
 const { getPossibleTypes } = require('./scripts/getPossibleTypes');
+const { getStoreConfig } = require('./scripts/getStoreConfigData');
 
 // Cache possibleTypes to avoid fetching multiple times during build
 // Next.js calls webpack config for client, server, and edge runtimes
 let cachedPossibleTypes = null;
 let possibleTypesPromise = null;
+
+// Cache store config to avoid fetching multiple times during build
+let cachedStoreConfig = null;
+let cachedAvailableStores = null;
+let storeConfigPromise = null;
 
 const nextConfig = {
   reactStrictMode: true,
@@ -72,6 +78,26 @@ const nextConfig = {
       })();
     }
 
+    // Get store config data from GraphQL at build time
+    let storeConfigData = cachedStoreConfig || null;
+
+    // Start async fetch in background if not already started
+    if (cachedStoreConfig === null && !storeConfigPromise) {
+      storeConfigPromise = (async () => {
+        try {
+          const result = await getStoreConfig();
+          cachedStoreConfig = result.storeConfig;
+          cachedAvailableStores = result.availableStores || [];
+          console.log('✓ Fetched store config from GraphQL');
+          return result;
+        } catch (error) {
+          console.warn('⚠ Could not fetch store config:', error.message);
+          cachedStoreConfig = null;
+          return { storeConfig: null, availableStores: [] };
+        }
+      })();
+    }
+
     // Add GraphQL loader
     config.module.rules.push({
       test: /\.(graphql|gql)$/,
@@ -83,12 +109,15 @@ const nextConfig = {
       ],
     });
 
-    // Add DefinePlugin to inject possibleTypes
-    // Use JSON.stringify to ensure it's a proper JSON string
+    // Prepare store config values for DefinePlugin
     const possibleTypesJson = JSON.stringify(possibleTypes);
+    const storeConfigJson = JSON.stringify(storeConfigData);
+
+    // Add DefinePlugin to inject possibleTypes and store config
     config.plugins.push(
       new webpack.DefinePlugin({
         'process.env.POSSIBLE_TYPES': possibleTypesJson,
+        'process.env.STORE_CONFIG_DATA': storeConfigJson
       })
     );
 
@@ -109,7 +138,6 @@ const withPWA = require("next-pwa")({
   runtimeCaching: [
     {
       // Cache robots.txt, favicon.ico, and manifest.json
-      // Similar to pwa-arielbath registerRoutes.js - uses StaleWhileRevalidate
       urlPattern: /(robots\.txt|favicon\.ico|manifest\.json)/,
       handler: "StaleWhileRevalidate"
     },
@@ -150,13 +178,33 @@ const withPWA = require("next-pwa")({
       },
     },
     {
-      urlPattern: /\.(?:png|gif|jpg|jpeg|svg)$/i,
+      // Route for Next.js optimized images via /_next/image
+      // These are optimized images served through Next.js Image Optimization API
+      urlPattern: ({ url }) => {
+        return url.pathname === '/_next/image' && url.search.includes('url=');
+      },
+      handler: "CacheFirst",
+      options: {
+        cacheName: "next-images",
+        expiration: {
+          maxEntries: 120, // MAX_NUM_OF_IMAGES_TO_CACHE
+          maxAgeSeconds: 7 * 24 * 60 * 60, // 7 days
+        },
+        cacheableResponse: {
+          statuses: [0, 200],
+        },
+      },
+    },
+    {
+      // Route for direct image files (png, gif, jpg, jpeg, svg, webp)
+      // This handles images that are not optimized through Next.js
+      urlPattern: /\.(?:png|gif|jpg|jpeg|svg|webp)$/i,
       handler: "CacheFirst",
       options: {
         cacheName: "images",
         expiration: {
           maxEntries: 120, // MAX_NUM_OF_IMAGES_TO_CACHE
-          maxAgeSeconds: 3 * 24 * 60 * 60, // 3 days
+          maxAgeSeconds: 7 * 24 * 60 * 60, // 7 days
         },
         cacheableResponse: {
           statuses: [0, 200],

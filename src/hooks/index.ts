@@ -6,3 +6,4 @@ export * from "./useAuthenticate";
 export * from "./useDisclosure";
 export * from "./useResolveUrl";
 export * from "./useWishlist";
+export * from "./useStoreConfig";

@@ -1,0 +1,14 @@
+query getCmsHomePage($identifier: String!) {
+  cmsPage(identifier: $identifier) {
+    title
+    content
+    content_heading
+    meta_title
+    meta_description
+    meta_keywords
+    page_layout
+    url_key
+    identifier
+  }
+}
+

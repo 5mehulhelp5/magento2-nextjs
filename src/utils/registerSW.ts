@@ -8,17 +8,14 @@
 const VALID_SERVICE_WORKER_ENVIRONMENT =
   typeof window !== "undefined" &&
   "serviceWorker" in navigator &&
-  (window.location.protocol === "https:" ||
-    window.location.hostname === "localhost" ||
-    window.location.hostname === "127.0.0.1");
+  (window.location.protocol === "https:");
 
 /**
  * Handle messages from the service worker
  */
 function handleMessageFromSW(
   type: string,
-  payload: any,
-  event: MessageEvent
+  payload: any
 ) {
   switch (type) {
     case "SKIP_WAITING":
